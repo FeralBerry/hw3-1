@@ -1,13 +1,11 @@
 package ru.hogwarts.school.controllers;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.hogwarts.school.models.Faculty;
 import ru.hogwarts.school.models.Student;
 import ru.hogwarts.school.services.StudentService;
 
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/student")
@@ -16,32 +14,27 @@ public class StudentController {
     public StudentController(StudentService studentService){
         this.studentService = studentService;
     }
-    @PostMapping("/create")
+    @PostMapping("/")
     public Student create(@RequestBody Student student){
         return studentService.create(student);
     }
     @GetMapping("/read")
-    public ResponseEntity<Map<Long, Student>> read(){
-        Map <Long, Student> facultyMap = studentService.read();
-        if(facultyMap == null){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(facultyMap);
+    public ResponseEntity<List<Student>> read(){
+        List <Student> facultyList = studentService.read();
+        return ResponseEntity.ok(facultyList);
     }
     @PutMapping("/put")
     public Student put(@RequestBody Student student){
         return studentService.update(student);
     }
     @DeleteMapping("/delete/{id}")
-    public Student delete(@PathVariable long id){
-        return studentService.delete(id);
+    public ResponseEntity delete(@PathVariable long id){
+        studentService.delete(id);
+        return ResponseEntity.ok().build();
     }
     @GetMapping("/sort_by_age")
-    public ResponseEntity<Map<Long, Student>> sortByAge(@RequestBody Student student){
-        Map <Long, Student> studentMap = studentService.read();
-        if(studentMap == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        return ResponseEntity.ok(studentMap);
+    public ResponseEntity<List<Student>> sortByAge(@RequestBody int age){
+        List<Student> studentList = studentService.sortByAge(age);
+        return ResponseEntity.ok(studentList);
     }
 }

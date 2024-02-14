@@ -1,48 +1,34 @@
 package ru.hogwarts.school.services;
 
+
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.models.Student;
+import ru.hogwarts.school.repository.StudentRepository;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
-    private final Map<Long, Student> students = new HashMap<>();
-    private Long counter = 0L;
+    private final StudentRepository studentRepository;
+    public StudentService(StudentRepository studentRepository){
+        this.studentRepository = studentRepository;
+    }
     public Student create(Student student){
-        student.setId(++counter);
-        students.put(counter,student);
-        return student;
+        return studentRepository.save(student);
     }
-    public Map<Long, Student> read(){
-        return students;
+    public List<Student> read(){
+        return studentRepository.findAll();
     }
-    public Student delete(long id){
-        Student student = students.get(id);
-        if(student != null){
-            students.remove(id);
-        } else {
-            throw new NoSuchElementException();
-        }
-        return student;
+    public void delete(long id){
+        studentRepository.deleteById(id);
     }
     public Student update(Student student){
-        Student oldStudent = students.get(student.getId());
-        if(oldStudent != null){
-            students.put(student.getId(),student);
-        } else {
-            throw new NoSuchElementException();
-        }
-        return student;
+        return studentRepository.save(student);
     }
-    public Map<Long, Student> sortByAge(Student student){
-        return students
-                .entrySet()
-                .stream()
-                .filter(s -> s.getValue().getAge() == student.getAge())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    public List<Student> sortByAge(int age){
+        return read().stream()
+                .filter(s -> s.getAge() == age)
+                .collect(Collectors.toList());
     }
 }

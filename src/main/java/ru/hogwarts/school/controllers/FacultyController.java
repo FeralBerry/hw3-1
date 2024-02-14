@@ -1,12 +1,11 @@
 package ru.hogwarts.school.controllers;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.models.Faculty;
 import ru.hogwarts.school.services.FacultyService;
 
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/faculty")
@@ -15,17 +14,14 @@ public class FacultyController {
     public FacultyController(FacultyService facultyService){
         this.facultyService = facultyService;
     }
-    @PostMapping("/create")
+    @PostMapping("/")
     public Faculty create(@RequestBody Faculty faculty){
         return facultyService.create(faculty);
     }
     @GetMapping("/read")
-    public ResponseEntity<Map<Long,Faculty>> read(){
-        Map <Long, Faculty> facultyMap = facultyService.read();
-        if(facultyMap == null){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(facultyMap);
+    public ResponseEntity<List<Faculty>> read(){
+        List <Faculty> facultyList = facultyService.read();
+        return ResponseEntity.ok(facultyList);
     }
     @PutMapping("/put")
     public ResponseEntity<Faculty> put(@RequestBody Faculty faculty){
@@ -36,15 +32,13 @@ public class FacultyController {
         return ResponseEntity.ok(facultyPut);
     }
     @DeleteMapping("/delete/{id}")
-    public Faculty delete(@PathVariable long id){
-        return facultyService.delete(id);
+    public ResponseEntity delete(@PathVariable long id){
+        facultyService.delete(id);
+        return ResponseEntity.ok().build();
     }
     @GetMapping("/sort_by_color")
-    public ResponseEntity<Map<Long,Faculty>> sortByColor(@RequestBody Faculty faculty){
-        Map <Long, Faculty> facultyMap = facultyService.sortByColor(faculty);
-        if(facultyMap == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        return ResponseEntity.ok(facultyMap);
+    public ResponseEntity<List<Faculty>> sortByColor(@RequestBody String color){
+        List<Faculty> facultyList = facultyService.sortByColor(color);
+        return ResponseEntity.ok(facultyList);
     }
 }
