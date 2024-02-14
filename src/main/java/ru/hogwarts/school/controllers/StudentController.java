@@ -18,21 +18,21 @@ public class StudentController {
     public Student create(@RequestBody Student student){
         return studentService.create(student);
     }
-    @GetMapping("/read")
+    @GetMapping("/")
     public ResponseEntity<List<Student>> read(){
         List <Student> facultyList = studentService.read();
         return ResponseEntity.ok(facultyList);
     }
-    @PutMapping("/put")
+    @PutMapping("/")
     public Student put(@RequestBody Student student){
         return studentService.update(student);
     }
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable long id){
         studentService.delete(id);
         return ResponseEntity.ok().build();
     }
-    @GetMapping("/sort_by_age")
+    @GetMapping("/sort-by-age")
     public ResponseEntity<List<Student>> sortByAge(@RequestBody int age){
         List<Student> studentList = studentService.sortByAge(age);
         return ResponseEntity.ok(studentList);

@@ -18,12 +18,12 @@ public class FacultyController {
     public Faculty create(@RequestBody Faculty faculty){
         return facultyService.create(faculty);
     }
-    @GetMapping("/read")
+    @GetMapping("/")
     public ResponseEntity<List<Faculty>> read(){
         List <Faculty> facultyList = facultyService.read();
         return ResponseEntity.ok(facultyList);
     }
-    @PutMapping("/put")
+    @PutMapping("/")
     public ResponseEntity<Faculty> put(@RequestBody Faculty faculty){
         Faculty facultyPut = facultyService.update(faculty);
         if(facultyPut == null){
@@ -31,12 +31,12 @@ public class FacultyController {
         }
         return ResponseEntity.ok(facultyPut);
     }
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable long id){
         facultyService.delete(id);
         return ResponseEntity.ok().build();
     }
-    @GetMapping("/sort_by_color")
+    @GetMapping("/sort-by-color")
     public ResponseEntity<List<Faculty>> sortByColor(@RequestBody String color){
         List<Faculty> facultyList = facultyService.sortByColor(color);
         return ResponseEntity.ok(facultyList);
