@@ -14,16 +14,16 @@ public class StudentController {
     public StudentController(StudentService studentService){
         this.studentService = studentService;
     }
-    @PostMapping("/")
+    @PostMapping
     public Student create(@RequestBody Student student){
         return studentService.create(student);
     }
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<Student>> read(){
         List <Student> facultyList = studentService.read();
         return ResponseEntity.ok(facultyList);
     }
-    @PutMapping("/")
+    @PutMapping
     public Student put(@RequestBody Student student){
         return studentService.update(student);
     }
@@ -36,5 +36,15 @@ public class StudentController {
     public ResponseEntity<List<Student>> sortByAge(@RequestBody int age){
         List<Student> studentList = studentService.sortByAge(age);
         return ResponseEntity.ok(studentList);
+    }
+    @GetMapping("/find-by-age-between")
+    public ResponseEntity<List<Student>> findByAgeBetween(@RequestParam int min,
+                                                          @RequestParam int max){
+        List<Student> studentList = studentService.findByAgeBetween(min,max);
+        return ResponseEntity.ok(studentList);
+    }
+    @GetMapping("/faculty")
+    public List<Student> findAllByFaculty_id(@RequestBody long id){
+        return studentService.findAllByFaculty_id(id);
     }
 }
