@@ -1,6 +1,6 @@
-SELECT * from student;
-SELECT name from student;
-SELECT * from student where age > 10 and age < 20;
-SELECT * from student where lower(name) like '%о%';
-SELECT * from student where age > student.id;
-SELECT * from student ORDER BY age;
+SELECT * from students;
+SELECT name from students;
+SELECT * from students where age > 10 and age < 20;
+SELECT * from students where lower(name) like '%о%';
+SELECT * from students where age > student.id;
+SELECT * from students ORDER BY age;

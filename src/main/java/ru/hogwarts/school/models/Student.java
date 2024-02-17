@@ -4,31 +4,22 @@ import jakarta.persistence.*;
 
 import java.util.Objects;
 @Entity
+@Table(name = "students")
 public class Student {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String name;
     private int age;
-    private int faculty_id;
     @ManyToOne
     @JoinColumn(name = "faculty_id")
     private Faculty faculty;
-    public Student(long id, String name, int age) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-    }
-
-    public Student() {
-
-    }
 
     public long getId() {
         return id;
     }
-    public long getFacultyId() {
-        return faculty_id;
+    public Faculty getFaculty() {
+        return faculty;
     }
     public String getName() {
         return name;
@@ -38,7 +29,7 @@ public class Student {
         return age;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -48,6 +39,9 @@ public class Student {
 
     public void setAge(int age) {
         this.age = age;
+    }
+    public void setFaculty(Faculty faculty) {
+        this.faculty = faculty;
     }
     @Override
     public boolean equals(Object o) {

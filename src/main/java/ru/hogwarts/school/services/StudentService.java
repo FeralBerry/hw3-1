@@ -2,11 +2,13 @@ package ru.hogwarts.school.services;
 
 
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.exceptions.StudentNotFoundException;
+import ru.hogwarts.school.models.Faculty;
 import ru.hogwarts.school.models.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class StudentService {
@@ -15,6 +17,7 @@ public class StudentService {
         this.studentRepository = studentRepository;
     }
     public Student create(Student student){
+        student.setId(null);
         return studentRepository.save(student);
     }
     public List<Student> read(){
@@ -23,21 +26,24 @@ public class StudentService {
     public void delete(long id){
         studentRepository.deleteById(id);
     }
-    public Student update(Student student){
-        return studentRepository.save(student);
+    public Student update(long id, Student student){
+        return studentRepository.findById(id)
+                        .map(oldStudent -> {
+                            oldStudent.setName(student.getName());
+                            oldStudent.setAge(student.getAge());
+                            return studentRepository.save(oldStudent);
+                        }).orElseThrow(() -> new StudentNotFoundException(id));
     }
-    public List<Student> sortByAge(int age){
-        return read().stream()
-                .filter(s -> s.getAge() == age)
-                .collect(Collectors.toList());
+    public List<Student> findAllByAge(int age){
+        return studentRepository.findAllByAge(age);
     }
-    public List<Student> findByAgeBetween(int min, int max){
-        return read().stream()
-                .filter(s -> s.getAge() < max)
-                .filter(s-> s.getAge() > min)
-                .collect(Collectors.toList());
+    public List<Student> findAllByAgeBetween(int min, int max){
+        return studentRepository.findAllByAgeBetween(min, max);
     }
-    public List<Student> findAllByFaculty_id(long id){
-        return studentRepository.findAllByFaculty_id(id);
+    public Student get(long id){
+        return studentRepository.findById(id).orElseThrow(() -> new StudentNotFoundException(id));
+    }
+    public Faculty findFaculty(long id){
+        return get(id).getFaculty();
     }
 }

@@ -1,12 +1,15 @@
 package ru.hogwarts.school.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.models.Faculty;
 import ru.hogwarts.school.models.Student;
 import ru.hogwarts.school.services.StudentService;
 
 import java.util.List;
-
+@Tag(name = "Студенты",description = "Эндпоинты для работы со студентами")
 @RestController
 @RequestMapping("/student")
 public class StudentController {
@@ -15,36 +18,43 @@ public class StudentController {
         this.studentService = studentService;
     }
     @PostMapping
+    @Operation(summary = "Создание студента")
     public Student create(@RequestBody Student student){
         return studentService.create(student);
     }
     @GetMapping
+    @Operation(summary = "Получение списка всех студентов")
     public ResponseEntity<List<Student>> read(){
         List <Student> facultyList = studentService.read();
         return ResponseEntity.ok(facultyList);
     }
-    @PutMapping
-    public Student put(@RequestBody Student student){
-        return studentService.update(student);
+    @PutMapping("/{id}")
+    @Operation(summary = "Обновление информации о студенте по id")
+    public Student put(@PathVariable long id,@RequestBody Student student){
+        return studentService.update(id,student);
     }
     @DeleteMapping("/{id}")
+    @Operation(summary = "Удаление студента по id")
     public ResponseEntity delete(@PathVariable long id){
         studentService.delete(id);
         return ResponseEntity.ok().build();
     }
-    @GetMapping("/sort-by-age")
-    public ResponseEntity<List<Student>> sortByAge(@RequestBody int age){
-        List<Student> studentList = studentService.sortByAge(age);
+    @GetMapping(params = "age")
+    @Operation(summary = "Получение списка студентов у которых возраст равен параметру")
+    public ResponseEntity<List<Student>> findAllByAge(@RequestParam int age){
+        List<Student> studentList = studentService.findAllByAge(age);
         return ResponseEntity.ok(studentList);
     }
-    @GetMapping("/find-by-age-between")
-    public ResponseEntity<List<Student>> findByAgeBetween(@RequestParam int min,
+    @GetMapping(params = {"min","max"})
+    @Operation(summary = "Получение студентов у которых возраст между параметрами min & max")
+    public ResponseEntity<List<Student>> findAllByAgeBetween(@RequestParam int min,
                                                           @RequestParam int max){
-        List<Student> studentList = studentService.findByAgeBetween(min,max);
+        List<Student> studentList = studentService.findAllByAgeBetween(min,max);
         return ResponseEntity.ok(studentList);
     }
-    @GetMapping("/faculty")
-    public List<Student> findAllByFaculty_id(@RequestBody long id){
-        return studentService.findAllByFaculty_id(id);
+    @GetMapping("/{id}/faculty")
+    @Operation(summary = "Получение факультета по id студента")
+    public Faculty findFaculty(@PathVariable long id){
+        return studentService.findFaculty(id);
     }
 }
