@@ -8,7 +8,6 @@ import ru.hogwarts.school.models.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class StudentService {
@@ -45,5 +44,8 @@ public class StudentService {
     }
     public Faculty findFaculty(long id){
         return get(id).getFaculty();
+    }
+    public Student findStudentById(long id){
+        return studentRepository.findStudentById(id);
     }
 }
