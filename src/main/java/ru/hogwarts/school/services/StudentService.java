@@ -22,10 +22,10 @@ public class StudentService {
     public List<Student> read(){
         return studentRepository.findAll();
     }
-    public void delete(long id){
+    public void delete(Long id){
         studentRepository.deleteById(id);
     }
-    public Student update(long id, Student student){
+    public Student update(Long id, Student student){
         return studentRepository.findById(id)
                         .map(oldStudent -> {
                             oldStudent.setName(student.getName());
@@ -39,13 +39,13 @@ public class StudentService {
     public List<Student> findAllByAgeBetween(int min, int max){
         return studentRepository.findAllByAgeBetween(min, max);
     }
-    public Student get(long id){
+    public Student get(Long id){
         return studentRepository.findById(id).orElseThrow(() -> new StudentNotFoundException(id));
     }
-    public Faculty findFaculty(long id){
+    public Faculty findFaculty(Long id){
         return get(id).getFaculty();
     }
-    public Student findStudentById(long id){
+    public Student findStudentById(Long id){
         return studentRepository.findStudentById(id);
     }
 }

@@ -28,14 +28,20 @@ public class StudentController {
         List <Student> facultyList = studentService.read();
         return ResponseEntity.ok(facultyList);
     }
+    @GetMapping("/{id}")
+    @Operation(summary = "Получение списка всех студентов")
+    public ResponseEntity<Student> get(@PathVariable Long id){
+        Student student = studentService.get(id);
+        return ResponseEntity.ok(student);
+    }
     @PutMapping("/{id}")
     @Operation(summary = "Обновление информации о студенте по id")
-    public Student put(@PathVariable long id,@RequestBody Student student){
+    public Student put(@PathVariable Long id,@RequestBody Student student){
         return studentService.update(id,student);
     }
     @DeleteMapping("/{id}")
     @Operation(summary = "Удаление студента по id")
-    public ResponseEntity delete(@PathVariable long id){
+    public ResponseEntity delete(@PathVariable Long id){
         studentService.delete(id);
         return ResponseEntity.ok().build();
     }
@@ -54,7 +60,7 @@ public class StudentController {
     }
     @GetMapping("/{id}/faculty")
     @Operation(summary = "Получение факультета по id студента")
-    public Faculty findFaculty(@PathVariable long id){
+    public Faculty findFaculty(@PathVariable Long id){
         return studentService.findFaculty(id);
     }
 }

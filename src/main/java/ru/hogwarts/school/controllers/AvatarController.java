@@ -30,7 +30,7 @@ public class AvatarController {
 
     @PostMapping(value = "/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Загрузка аватарки")
-    public ResponseEntity<String> uploadAvatar(@PathVariable long id, @RequestParam MultipartFile avatar) throws IOException {
+    public ResponseEntity<String> uploadAvatar(@PathVariable Long id, @RequestParam MultipartFile avatar) throws IOException {
         if(avatar.getSize() >= 1024 * 1000){
             return ResponseEntity.badRequest().body("File is too big");
         }
@@ -40,7 +40,7 @@ public class AvatarController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Получение миниатюры аватарки из БД")
-    public ResponseEntity<byte[]> downloadAvatar(@PathVariable long id) {
+    public ResponseEntity<byte[]> downloadAvatar(@PathVariable Long id) {
         Avatar avatar = avatarService.findAvatar(id);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(avatar.getMediaType()));
@@ -49,7 +49,7 @@ public class AvatarController {
     }
     @GetMapping("/{id}/preview")
     @Operation(summary = "Получение аватарки из папки на диске")
-    public void downloadCover(@PathVariable long id, HttpServletResponse response) throws IOException {
+    public void downloadCover(@PathVariable Long id, HttpServletResponse response) throws IOException {
         Avatar avatar = avatarService.findAvatar(id);
 
         Path path = Path.of(avatar.getFilePath());

@@ -1,6 +1,5 @@
 package ru.hogwarts.school.services;
 
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.exceptions.FacultyNotFoundException;
 import ru.hogwarts.school.models.Faculty;
@@ -9,7 +8,6 @@ import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FacultyService {
@@ -26,10 +24,10 @@ public class FacultyService {
     public List<Faculty> read(){
         return facultyRepository.findAll();
     }
-    public void delete(long id){
+    public void delete(Long id){
         facultyRepository.deleteById(id);
     }
-    public Faculty update(long id,Faculty faculty){
+    public Faculty update(Long id,Faculty faculty){
         return facultyRepository.findById(id)
                 .map(oldFaculty -> {
                     oldFaculty.setName(faculty.getName());
@@ -46,10 +44,10 @@ public class FacultyService {
     public List<Faculty> findAllByNameContainsIgnoreCase(String part){
         return facultyRepository.findAllByNameContainsIgnoreCase(part);
     }
-    public Faculty get(long id){
+    public Faculty get(Long id){
         return facultyRepository.findFacultyById(id);
     }
-    public List<Student> findFacultyById(long id){
+    public List<Student> findFacultyById(Long id){
         Faculty faculty = get(id);
         return studentRepository.findByFaculty_Id(faculty.getId());
     }
