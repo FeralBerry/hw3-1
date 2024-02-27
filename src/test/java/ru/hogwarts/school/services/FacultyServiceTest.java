@@ -133,7 +133,25 @@ class FacultyServiceTest {
 
     @Test
     void get() throws Exception {
-        create();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name",name);
+        jsonObject.put("color",color);
+        Faculty faculty = new Faculty();
+        faculty.setId(id);
+        faculty.setName(name);
+        faculty.setColor(color);
+        when(facultyRepository.save(any(Faculty.class))).thenReturn(faculty);
+        when(facultyRepository.findById(any(Long.class))).thenReturn(Optional.of(faculty));
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/faculty")
+                        .content(jsonObject.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.name").value(name))
+                .andExpect(jsonPath("$.color").value(color));
+        when(facultyService.get(id)).thenReturn(faculty);
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/faculty/" + id)
                         .accept(MediaType.APPLICATION_JSON))
@@ -146,25 +164,33 @@ class FacultyServiceTest {
     @Test
     void findFacultyById() throws Exception {
         create();
+        get();
         Long studentId = 1L;
         String studentName = "Garry";
         int studentAge = 11;
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name",studentName);
         jsonObject.put("age",studentAge);
-        Faculty faculty = new Faculty();
-        faculty.setId(id);
-        faculty.setName(name);
-        faculty.setColor(color);
         Student student = new Student();
         student.setId(studentId);
         student.setName(studentName);
         student.setAge(studentAge);
-        student.setFaculty(faculty);
         when(studentRepository.save(any(Student.class))).thenReturn(student);
-        /*System.out.println(mockMvc.perform(MockMvcRequestBuilders
-                        .get("/faculty/" + id + "/students") // не вижу ошибки, но не работает (выдает будто факультет отсутствует)
+        when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/student")
+                        .content(jsonObject.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString());*/
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(studentId))
+                .andExpect(jsonPath("$.name").value(studentName))
+                .andExpect(jsonPath("$.age").value(studentAge));
+        when(facultyService.findFacultyById(id)).thenReturn(List.of(student));
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/faculty/" + id + "/students")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].id").value(id)); //выдает ошибку при сравнении 1 и 1
     }
 }
