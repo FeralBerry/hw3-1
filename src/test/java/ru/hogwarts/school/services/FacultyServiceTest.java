@@ -2,20 +2,17 @@ package ru.hogwarts.school.services;
 
 
 import org.json.JSONObject;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import ru.hogwarts.school.models.Faculty;
 
 import ru.hogwarts.school.models.Student;
@@ -25,21 +22,18 @@ import ru.hogwarts.school.repository.StudentRepository;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
+@AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
 class FacultyServiceTest {
     @Autowired
-    private WebApplicationContext webApplicationContext;
     private MockMvc mockMvc;
-    @BeforeEach
-    public void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-    }
     @MockBean
     private FacultyRepository facultyRepository;
     @SpyBean
@@ -60,7 +54,7 @@ class FacultyServiceTest {
         faculty.setColor(color);
         when(facultyRepository.save(any(Faculty.class))).thenReturn(faculty);
         when(facultyRepository.findById(any(Long.class))).thenReturn(Optional.of(faculty));
-        mockMvc.perform(MockMvcRequestBuilders
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/faculty")
                         .content(jsonObject.toString())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,20 +75,28 @@ class FacultyServiceTest {
         faculty.setColor(color);
         when(facultyRepository.save(any(Faculty.class))).thenReturn(faculty);
         when(facultyRepository.findAll()).thenReturn(List.of(faculty));
-        mockMvc.perform(MockMvcRequestBuilders
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/faculty")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*").isNotEmpty());
+                .andExpect(jsonPath("$[0].id").value(id))
+                .andExpect(jsonPath("$[0].name").value(name))
+                .andExpect(jsonPath("$[0].color").value(color));
     }
     @Test
     void delete() throws Exception {
         create();
-        Assertions.assertEquals("",mockMvc.perform(MockMvcRequestBuilders
+        assertThat(mockMvc.perform(MockMvcRequestBuilders
                         .delete("/faculty/" + id)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString());
+                .andReturn().getResponse().getContentAsString()).isEqualTo("");
+        // в принципе в данном случае разницы нет
+        /*Assertions.assertEquals("",mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/faculty/" + id)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString()); */
     }
     @Test
     void update() throws Exception {
@@ -109,7 +111,7 @@ class FacultyServiceTest {
         jsonObject.put("name",newName);
         jsonObject.put("color",newColor);
         when(facultyService.update(id,faculty)).thenReturn(faculty);
-        mockMvc.perform(MockMvcRequestBuilders
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .put("/faculty/" + id)
                         .content(jsonObject.toString())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -122,13 +124,18 @@ class FacultyServiceTest {
     @Test
     void findByColorIgnoreCase() throws Exception {
         create();
-        Assertions.assertTrue(mockMvc.perform(MockMvcRequestBuilders
+        Faculty faculty = new Faculty();
+        faculty.setId(id);
+        faculty.setName(name);
+        faculty.setColor(color);
+        when(facultyRepository.findByColorIgnoreCase(color)).thenReturn(List.of(faculty));
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/faculty?color=" + color )
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString().contains(color));
+                .andExpect(jsonPath("$[0].id").value(id))
+                .andExpect(jsonPath("$[0].name").value(name))
+                .andExpect(jsonPath("$[0].color").value(color));
     }
 
     @Test
@@ -142,7 +149,7 @@ class FacultyServiceTest {
         faculty.setColor(color);
         when(facultyRepository.save(any(Faculty.class))).thenReturn(faculty);
         when(facultyRepository.findById(any(Long.class))).thenReturn(Optional.of(faculty));
-        mockMvc.perform(MockMvcRequestBuilders
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/faculty")
                         .content(jsonObject.toString())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -152,7 +159,7 @@ class FacultyServiceTest {
                 .andExpect(jsonPath("$.name").value(name))
                 .andExpect(jsonPath("$.color").value(color));
         when(facultyService.get(id)).thenReturn(faculty);
-        mockMvc.perform(MockMvcRequestBuilders
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/faculty/" + id)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -177,7 +184,7 @@ class FacultyServiceTest {
         student.setAge(studentAge);
         when(studentRepository.save(any(Student.class))).thenReturn(student);
         when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
-        mockMvc.perform(MockMvcRequestBuilders
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/student")
                         .content(jsonObject.toString())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -187,10 +194,11 @@ class FacultyServiceTest {
                 .andExpect(jsonPath("$.name").value(studentName))
                 .andExpect(jsonPath("$.age").value(studentAge));
         when(facultyService.findFacultyById(id)).thenReturn(List.of(student));
-        mockMvc.perform(MockMvcRequestBuilders
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/faculty/" + id + "/students")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id").value(id)); //выдает ошибку при сравнении 1 и 1
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(id));
     }
 }

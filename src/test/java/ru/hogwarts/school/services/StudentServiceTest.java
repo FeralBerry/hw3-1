@@ -1,20 +1,17 @@
 package ru.hogwarts.school.services;
 
 import org.json.JSONObject;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import ru.hogwarts.school.models.Faculty;
 import ru.hogwarts.school.models.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
@@ -23,21 +20,18 @@ import ru.hogwarts.school.repository.StudentRepository;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
+@AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
 class StudentServiceTest {
     @Autowired
-    private WebApplicationContext webApplicationContext;
     private MockMvc mockMvc;
-    @BeforeEach
-    public void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-    }
     @MockBean
     private StudentRepository studentRepository;
     @SpyBean
@@ -58,7 +52,7 @@ class StudentServiceTest {
         student.setAge(age);
         when(studentRepository.save(any(Student.class))).thenReturn(student);
         when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
-        mockMvc.perform(MockMvcRequestBuilders
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/student")
                         .content(jsonObject.toString())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -79,20 +73,28 @@ class StudentServiceTest {
         student.setAge(age);
         when(studentRepository.save(any(Student.class))).thenReturn(student);
         when(studentRepository.findAll()).thenReturn(List.of(student));
-        mockMvc.perform(MockMvcRequestBuilders
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/student")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*").isNotEmpty());
+                .andExpect(jsonPath("$[0].id").value(id))
+                .andExpect(jsonPath("$[0].name").value(name))
+                .andExpect(jsonPath("$[0].age").value(age));
     }
     @Test
     void delete() throws Exception {
         create();
-        Assertions.assertEquals("",mockMvc.perform(MockMvcRequestBuilders
+        assertThat(this.mockMvc.perform(MockMvcRequestBuilders
                         .delete("/student/" + id)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString());
+                .andReturn().getResponse().getContentAsString()).isEqualTo("");
+        //
+        /*Assertions.assertEquals("",this.mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/student/" + id)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());*/
     }
 
     @Test
@@ -108,7 +110,7 @@ class StudentServiceTest {
         jsonObject.put("name",newName);
         jsonObject.put("age",newAge);
         when(studentService.update(id,student)).thenReturn(student);
-        mockMvc.perform(MockMvcRequestBuilders
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .put("/student/" + id)
                         .content(jsonObject.toString())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -121,7 +123,18 @@ class StudentServiceTest {
     @Test
     void findAllByAge() throws Exception {
         create();
-        studentService.findAllByAge(age).forEach(s->Assertions.assertEquals(age,s.getAge()));
+        Student student = new Student();
+        student.setId(id);
+        student.setName(name);
+        student.setAge(age);
+        when(studentRepository.findAllByAge(age)).thenReturn(List.of(student));
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student?age=" + age )
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(id))
+                .andExpect(jsonPath("$[0].name").value(name))
+                .andExpect(jsonPath("$[0].age").value(age));
     }
 
     @Test
@@ -145,15 +158,19 @@ class StudentServiceTest {
         when(studentRepository.save(any(Student.class))).thenReturn(student2);
         when(studentRepository.save(any(Student.class))).thenReturn(student3);
         when(studentService.findAllByAgeBetween(min, max)).thenReturn(expected);
-        studentService.findAllByAgeBetween(min,max).forEach(s->
-            Assertions.assertTrue(min <= s.getAge() && s.getAge() <= max)
-        );
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student?min=" + min + "&max=" + max )
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(id))
+                .andExpect(jsonPath("$[0].name").value(name))
+                .andExpect(jsonPath("$[0].age").value(age));
     }
 
     @Test
     void get() throws Exception {
         create();
-        mockMvc.perform(MockMvcRequestBuilders
+        this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/student/" + id)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -171,6 +188,12 @@ class StudentServiceTest {
         faculty.setColor("Красный");
         when(facultyRepository.save(any(Faculty.class))).thenReturn(faculty);
         when(studentService.findFaculty(1L)).thenReturn(faculty);
-        Assertions.assertEquals(faculty,studentService.findFaculty(1L));
+        this.mockMvc.perform(MockMvcRequestBuilders
+                .get("/student/" + id + "/faculty")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(faculty.getId()))
+                .andExpect(jsonPath("$.name").value(faculty.getName()))
+                .andExpect(jsonPath("$.color").value(faculty.getColor()));
     }
 }
