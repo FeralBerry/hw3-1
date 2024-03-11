@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 @Tag(name = "Автар",description = "Эндпоинты для работы с аватарами")
 @RestController
@@ -62,5 +63,11 @@ public class AvatarController {
             response.setContentLength((int) avatar.getFileSize());
             is.transferTo(os);
         }
+    }
+    @GetMapping
+    @Operation(summary = "Получение всех аватарок")
+    public ResponseEntity<List<Avatar>> getAvatars(@RequestParam Integer page, @RequestParam Integer size){
+        List <Avatar> avatars = avatarService.getAvatars(page,size);
+        return ResponseEntity.ok(avatars);
     }
 }

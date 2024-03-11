@@ -48,4 +48,13 @@ public class StudentService {
     public Student findStudentById(Long id){
         return studentRepository.findStudentById(id);
     }
+    public Long countStudents(){
+        return studentRepository.countStudents();
+    }
+    public Double middleAgeStudents(){
+        return studentRepository.middleAgeStudents();
+    }
+    public List<Student> lastFiveStudents(){
+        return studentRepository.lastFiveStudents();
+    }
 }

@@ -1,6 +1,7 @@
 package ru.hogwarts.school.services;
 
 import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -89,12 +90,6 @@ class StudentServiceTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString()).isEqualTo("");
-        //
-        /*Assertions.assertEquals("",this.mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/student/" + id)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString());*/
     }
 
     @Test
@@ -195,5 +190,70 @@ class StudentServiceTest {
                 .andExpect(jsonPath("$.id").value(faculty.getId()))
                 .andExpect(jsonPath("$.name").value(faculty.getName()))
                 .andExpect(jsonPath("$.color").value(faculty.getColor()));
+    }
+    @Test
+    void countStudents() throws Exception {
+        create();
+        when(studentRepository.countStudents()).thenReturn(1L);
+        Assertions.assertEquals(this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student/count")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(), "1");
+    }
+    @Test
+    void middleAgeStudents() throws Exception {
+        create();
+        when(studentRepository.middleAgeStudents()).thenReturn(20.0);
+        Assertions.assertEquals(this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student/middle-age")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString(), "20.0");
+    }
+    @Test
+    void lastFiveStudents()throws Exception {
+        Student student1 = new Student();
+        student1.setId(1L);
+        student1.setName("Гарри");
+        student1.setAge(11);
+        Student student2 = new Student();
+        student2.setId(2L);
+        student2.setName("Рон");
+        student2.setAge(12);
+        Student student3 = new Student();
+        student3.setId(3L);
+        student3.setName("Гермиона");
+        student3.setAge(13);
+        Student student4 = new Student();
+        student4.setId(4L);
+        student4.setName("Малфой");
+        student4.setAge(11);
+        Student student5 = new Student();
+        student5.setId(5L);
+        student5.setName("Рита");
+        student5.setAge(12);
+        List<Student> expected = List.of(student1,student2,student3,student4,student5);
+        when(studentRepository.lastFiveStudents()).thenReturn(expected);
+        this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student/last-five")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(student1.getId()))
+                .andExpect(jsonPath("$[0].name").value(student1.getName()))
+                .andExpect(jsonPath("$[0].age").value(student1.getAge()))
+                .andExpect(jsonPath("$[1].id").value(student2.getId()))
+                .andExpect(jsonPath("$[1].name").value(student2.getName()))
+                .andExpect(jsonPath("$[1].age").value(student2.getAge()))
+                .andExpect(jsonPath("$[2].id").value(student3.getId()))
+                .andExpect(jsonPath("$[2].name").value(student3.getName()))
+                .andExpect(jsonPath("$[2].age").value(student3.getAge()))
+                .andExpect(jsonPath("$[3].id").value(student4.getId()))
+                .andExpect(jsonPath("$[3].name").value(student4.getName()))
+                .andExpect(jsonPath("$[3].age").value(student4.getAge()))
+                .andExpect(jsonPath("$[4].id").value(student5.getId()))
+                .andExpect(jsonPath("$[4].name").value(student5.getName()))
+                .andExpect(jsonPath("$[4].age").value(student5.getAge()));
+
     }
 }
