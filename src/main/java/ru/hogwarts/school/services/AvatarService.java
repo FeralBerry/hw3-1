@@ -1,6 +1,8 @@
 package ru.hogwarts.school.services;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -27,11 +29,13 @@ public class AvatarService {
     private String avatarDir;
     private final StudentService studentService;
     private final AvatarRepository avatarRepository;
+    Logger logger = LoggerFactory.getLogger(StudentService.class);
     public AvatarService(AvatarRepository avatarRepository,StudentService studentService){
         this.avatarRepository = avatarRepository;
         this.studentService = studentService;
     }
     public void uploadAvatar(Long id, MultipartFile avatar) throws IOException {
+        logger.info("Загрузка аватарки для студента с id " + id);
         Student student = studentService.findStudentById(id);
         Path filePath = Path.of(avatarDir, id + "." + getExtension(Objects.requireNonNull(avatar.getOriginalFilename())));
         Files.createDirectories(filePath.getParent());
@@ -57,6 +61,7 @@ public class AvatarService {
         return avatarRepository.findByStudentId(id).orElse(new Avatar());
     }
     private byte[] generateAvatarPreview(Path filePath) throws IOException{
+        logger.debug("Изменение размера аватарки для сохранения в БД");
         try (
                 InputStream is = Files.newInputStream(filePath);
                 BufferedInputStream bis = new BufferedInputStream(is, 1024);

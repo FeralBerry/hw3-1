@@ -254,6 +254,5 @@ class StudentServiceTest {
                 .andExpect(jsonPath("$[4].id").value(student5.getId()))
                 .andExpect(jsonPath("$[4].name").value(student5.getName()))
                 .andExpect(jsonPath("$[4].age").value(student5.getAge()));
-
     }
 }

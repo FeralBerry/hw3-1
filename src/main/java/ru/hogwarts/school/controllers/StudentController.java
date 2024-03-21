@@ -29,7 +29,7 @@ public class StudentController {
         return ResponseEntity.ok(facultyList);
     }
     @GetMapping("/{id}")
-    @Operation(summary = "Получение списка всех студентов")
+    @Operation(summary = "Получение студена по id")
     public ResponseEntity<Student> get(@PathVariable Long id){
         Student student = studentService.get(id);
         return ResponseEntity.ok(student);
