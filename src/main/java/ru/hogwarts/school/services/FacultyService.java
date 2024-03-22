@@ -15,7 +15,7 @@ import java.util.List;
 public class FacultyService {
     private  final FacultyRepository facultyRepository;
     private  final StudentRepository studentRepository;
-    Logger logger = LoggerFactory.getLogger(StudentService.class);
+    Logger logger = LoggerFactory.getLogger(FacultyService.class);
     public FacultyService(FacultyRepository facultyRepository,StudentRepository studentRepository){
         this.facultyRepository = facultyRepository;
         this.studentRepository = studentRepository;
