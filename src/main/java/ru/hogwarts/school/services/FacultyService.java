@@ -1,42 +1,85 @@
 package ru.hogwarts.school.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.exceptions.FacultyNotFoundException;
 import ru.hogwarts.school.models.Faculty;
+import ru.hogwarts.school.models.Student;
+import ru.hogwarts.school.repository.FacultyRepository;
+import ru.hogwarts.school.repository.StudentRepository;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class FacultyService {
-    private final Map<Long, Faculty> faculties = new HashMap<>();
-    private Long counter;
-    public Faculty create(String name, String color){
-        counter++;
-        Faculty faculty = new Faculty(counter,name,color);
-        faculties.put(counter,faculty);
-        return faculty;
+    private  final FacultyRepository facultyRepository;
+    private  final StudentRepository studentRepository;
+    Logger logger = LoggerFactory.getLogger(FacultyService.class);
+    public FacultyService(FacultyRepository facultyRepository,StudentRepository studentRepository){
+        this.facultyRepository = facultyRepository;
+        this.studentRepository = studentRepository;
     }
-    public Map<Long, Faculty> read(){
-        return faculties;
+    public Faculty create(Faculty faculty){
+        logger.info("Создан новый факультет: " + faculty.getName() + " с цветом " + faculty.getColor());
+        faculty.setId(null);
+        return facultyRepository.save(faculty);
     }
-    public Faculty delete(long id){
-        Faculty faculty = faculties.get(id);
-        if(faculty != null){
-            faculties.remove(id);
+    public List<Faculty> read(){
+        logger.info("Вызван метод просмотра всех факультетов");
+        return facultyRepository.findAll();
+    }
+    public void delete(Long id){
+        if(get(id) != null){
+            logger.warn("Удаление факультета");
+            facultyRepository.deleteById(id);
         } else {
-            throw new NoSuchElementException();
+            logger.error("Удаление не существующего факультета");
         }
-        return faculty;
     }
-    public Faculty update(long id, String name, String color){
-        Faculty oldFaculty = faculties.get(id);
-        Faculty faculty = new Faculty(id,name,color);
-        if(oldFaculty != null){
-            faculties.put(id,faculty);
-        } else {
-            throw new NoSuchElementException();
-        }
-        return faculty;
+    public Faculty update(Long id,Faculty faculty){
+        logger.info("Факультет с id " + id + "был изменен");
+        return facultyRepository.findById(id)
+                .map(oldFaculty -> {
+                    oldFaculty.setName(faculty.getName());
+                    oldFaculty.setColor(faculty.getColor());
+                    return facultyRepository.save(oldFaculty);
+                }).orElseThrow(() -> new FacultyNotFoundException(id));
+    }
+    public List<Faculty> findByColorIgnoreCase(String color){
+        logger.info("Вызван метод поиска студента по цвету");
+        return facultyRepository.findByColorIgnoreCase(color);
+    }
+    public List<Faculty> findByNameIgnoreCase(String name){
+        logger.info("Вызван метод поиска факультета по названию " + name);
+        return facultyRepository.findByNameIgnoreCase(name);
+    }
+    public List<Faculty> findAllByNameContainsIgnoreCase(String part){
+        logger.info("Вызван метод поиска факультета по части слова " + part);
+        return facultyRepository.findAllByNameContainsIgnoreCase(part);
+    }
+    public Faculty get(Long id){
+        logger.info("Вызван метод поиска факультета по id " + id);
+        return facultyRepository.findFacultyById(id);
+    }
+    public List<Student> findFacultyById(Long id){
+        logger.info("Вызван метод поиска студентов факультета по id " + id);
+        Faculty faculty = get(id);
+        return studentRepository.findByFaculty_Id(faculty.getId());
+    }
+    public String maxLengthFacultyName(){
+        return facultyRepository.findAll()
+                .stream()
+                .map(Faculty::getName)
+                .toList()
+                .stream()
+                .parallel()
+                .max(Comparator.comparingInt(String::length))
+                .orElse(null);
+    }
+    public int sumIterator(){
+        return Stream.iterate(1,a -> a + 1).limit(1000000).parallel().reduce(0, Integer::sum);
     }
 }
