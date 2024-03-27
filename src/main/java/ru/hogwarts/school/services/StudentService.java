@@ -70,10 +70,27 @@ public class StudentService {
     }
     public Double middleAgeStudents(){
         logger.info("Получение среднего возраста студентов");
+        return (double) (studentRepository.findAll()
+                        .stream()
+                        .map(Student::getAge)
+                        .mapToInt(i -> i)
+                        .sum() / studentRepository.countStudents());
+        /* метод через базу данных
         return studentRepository.middleAgeStudents();
+        */
     }
     public List<Student> lastFiveStudents(){
         logger.debug("Вызов метода lastFiveStudents");
         return studentRepository.lastFiveStudents();
+    }
+    public List<String> sortAllStudents(char firstChar){
+        logger.info("Сортировка студентов и вывод всех у кого имя начинается на " + firstChar);
+        return studentRepository.findAll()
+                .stream()
+                .parallel()
+                .filter(student -> student.getName().charAt(0) == firstChar)
+                .map(string -> string.getName().toUpperCase())
+                .sorted()
+                .toList();
     }
 }

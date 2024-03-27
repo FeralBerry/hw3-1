@@ -9,7 +9,9 @@ import ru.hogwarts.school.models.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 import ru.hogwarts.school.repository.StudentRepository;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class FacultyService {
@@ -66,5 +68,18 @@ public class FacultyService {
         logger.info("Вызван метод поиска студентов факультета по id " + id);
         Faculty faculty = get(id);
         return studentRepository.findByFaculty_Id(faculty.getId());
+    }
+    public String maxLengthFacultyName(){
+        return facultyRepository.findAll()
+                .stream()
+                .map(Faculty::getName)
+                .toList()
+                .stream()
+                .parallel()
+                .max(Comparator.comparingInt(String::length))
+                .orElse(null);
+    }
+    public int sumIterator(){
+        return Stream.iterate(1,a -> a + 1).limit(1000000).parallel().reduce(0, Integer::sum);
     }
 }

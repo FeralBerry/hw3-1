@@ -78,4 +78,9 @@ public class StudentController {
     public ResponseEntity<List<Student>> lastFiveStudents(){
         return ResponseEntity.ok(studentService.lastFiveStudents());
     }
+    @GetMapping("/sort-all-student")
+    @Operation(summary = "Сортировка студентов")
+    public ResponseEntity<List<String>> sortAllStudents(@RequestParam char firstChar){
+        return ResponseEntity.ok(studentService.sortAllStudents(firstChar));
+    }
 }

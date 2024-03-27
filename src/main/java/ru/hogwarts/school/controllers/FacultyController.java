@@ -2,12 +2,10 @@ package ru.hogwarts.school.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.models.Faculty;
 import ru.hogwarts.school.models.Student;
-import ru.hogwarts.school.repository.StudentRepository;
 import ru.hogwarts.school.services.FacultyService;
 
 import java.util.List;
@@ -83,5 +81,15 @@ public class FacultyController {
     @Operation(summary = "Получение списка студентов по факультету")
     public List<Student> findStudents(@PathVariable Long id) {
         return facultyService.findFacultyById(id);
+    }
+    @GetMapping("/max-faculty-length")
+    @Operation(summary = "Факультет с самой длинным названием")
+    public String maxLengthFacultyName(){
+        return facultyService.maxLengthFacultyName();
+    }
+    @GetMapping("/sum-iterator")
+    @Operation(summary = "Метод генерирующий последовательность и находящий сумму всех элементов")
+    public int sumIterator(){
+        return facultyService.sumIterator();
     }
 }
