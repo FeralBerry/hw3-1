@@ -93,4 +93,33 @@ public class StudentService {
                 .sorted()
                 .toList();
     }
+    public void printParallel(){
+        System.out.println(findStudentById(1L));
+        System.out.println(findStudentById(2L));
+        new Thread(() -> {
+            System.out.println(findStudentById(3L));
+            System.out.println(findStudentById(4L));
+        }).start();
+        new Thread(() -> {
+            System.out.println(findStudentById(5L));
+            System.out.println(findStudentById(6L));
+        }).start();
+    }
+    public synchronized void printSynchronized(){
+        System.out.println(findStudentById(1L));
+        System.out.println(findStudentById(2L));
+        new Thread(() -> {
+            printSync(3L);
+            printSync(4L);
+        }).start();
+        new Thread(() -> {
+            printSync(5L);
+            printSync(6L);
+        }).start();
+    }
+    public void printSync(Long studentId){
+        synchronized (StudentService.class){
+            System.out.println(findStudentById(studentId));
+        }
+    }
 }
