@@ -83,4 +83,14 @@ public class StudentController {
     public ResponseEntity<List<String>> sortAllStudents(@RequestParam char firstChar){
         return ResponseEntity.ok(studentService.sortAllStudents(firstChar));
     }
+    @GetMapping("/print-parallel")
+    @Operation(summary = "Параллельный вывод студентов")
+    public void printParallel(){
+        studentService.printParallel();
+    }
+    @GetMapping("/print-synchronized")
+    @Operation(summary = "Параллельный синхронизированный вывод студентов")
+    public void printSynchronized(){
+        studentService.printSynchronized();
+    }
 }
